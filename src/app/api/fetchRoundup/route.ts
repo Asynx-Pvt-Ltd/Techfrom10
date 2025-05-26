@@ -39,30 +39,34 @@ export const GET = async (req: Request) => {
 
 		// Add search condition if search query exists
 		if (searchQuery.trim()) {
+			// Use separate parameters for each ILIKE operation to avoid type conflicts
 			whereConditions.push(`(
 				EXISTS (
 					SELECT 1 FROM unnest(headlines) AS headline 
-					WHERE headline ILIKE ${paramIndex}
+					WHERE headline ILIKE $${paramIndex}
 				) OR
 				EXISTS (
 					SELECT 1 FROM unnest(summaries) AS summary 
-					WHERE summary ILIKE ${paramIndex}
+					WHERE summary ILIKE $${paramIndex + 1}
 				) OR
 				EXISTS (
 					SELECT 1 FROM unnest(sources) AS source 
-					WHERE source ILIKE ${paramIndex}
+					WHERE source ILIKE $${paramIndex + 2}
 				) OR
 				EXISTS (
 					SELECT 1 FROM unnest(hashtags) AS hashtag 
-					WHERE hashtag ILIKE ${paramIndex}
+					WHERE hashtag ILIKE $${paramIndex + 3}
 				) OR
-				title ILIKE ${paramIndex}
+				title ILIKE $${paramIndex + 4}
 			)`);
 
 			const searchParam = `%${searchQuery.trim()}%`;
-			dataQueryParams.push(searchParam);
-			countQueryParams.push(searchParam);
-			paramIndex++;
+			// Add the same search parameter 5 times for the 5 ILIKE operations
+			for (let i = 0; i < 5; i++) {
+				dataQueryParams.push(searchParam);
+				countQueryParams.push(searchParam);
+			}
+			paramIndex += 5;
 		}
 
 		// Add tags filter condition if tags are selected
