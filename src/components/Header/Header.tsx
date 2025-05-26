@@ -1,104 +1,129 @@
-"use client";
-import "./Header.scss";
-import { NextPage } from "next";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import NewsletterPopup from "../newsletter/newsletterPopup";
-
-import { Dropdown, Button, Space } from "antd";
-import { DownOutlined } from "@ant-design/icons";
-import MobHeader from "./mobHeader";
+'use client';
+import { NextPage } from 'next';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import NewsletterPopup from '../newsletter/newsletterPopup';
+import MobHeader from './mobHeader';
 
 interface Props {}
 
 const Header: NextPage<Props> = ({}) => {
-  const [isNewsletterOpen, setIsNewsletterOpen] = useState(false);
-  useEffect(() => {
-    const handleScroll = () => {
-      const navbar = document.querySelector(".nav-parent");
-      const navExtend = document.querySelector(".nav-container");
+	const [isNewsletterOpen, setIsNewsletterOpen] = useState(false);
+	const [isScrolled, setIsScrolled] = useState(false);
 
-      if (window.scrollY > 10) {
-        navbar?.classList.add("nav-parent-scrolled");
-        navbar?.classList.remove("nav-parent-default");
-        navExtend?.classList.add("hide-navextend");
-      } else {
-        navExtend?.classList.remove("hide-navextend");
-        navbar?.classList.remove("nav-parent-scrolled");
-        navbar?.classList.add("nav-parent-default");
-      }
-    };
+	useEffect(() => {
+		const handleScroll = () => {
+			setIsScrolled(window.scrollY > 10);
+		};
 
-    window.addEventListener("scroll", handleScroll);
+		window.addEventListener('scroll', handleScroll);
+		return () => window.removeEventListener('scroll', handleScroll);
+	}, []);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
+	const categories = [
+		{ key: '1', label: 'Software', route: 'software' },
+		{ key: '2', label: 'AI', route: 'ai' },
+		{ key: '3', label: 'Space', route: 'space' },
+		{ key: '4', label: 'Social Media', route: 'socialmedia' },
+		{ key: '5', label: 'Biotechnology', route: 'biotechnology' },
+		{ key: '6', label: 'Gadgets', route: 'gadgets' },
+		{ key: '7', label: 'Video Games', route: 'videogames' },
+		{ key: '8', label: 'Innovations', route: 'innovations' },
+	];
 
-  const categories = [
-    { key: "1", label: "Software", route: "software" },
-    { key: "2", label: "AI", route: "ai" },
-    { key: "3", label: "Space", route: "space" },
-    { key: "4", label: "Social Media", route: "socialmedia" },
-    { key: "5", label: "Biotechnology", route: "biotechnology" },
-    { key: "6", label: "Gadgets", route: "gadgets" },
-    { key: "7", label: "Video Games", route: "videogames" },
-    { key: "8", label: "Innovations", route: "innovations" },
-    // { key: "9", label: "Coding" },
-    // { key: "10", label: "Mobile" },
-    // { key: "11", label: "Robotics" },
-    // { key: "12", label: "Cybersecurity" },
-    // { key: "13", label: "Virtual Reality" },
-    // { key: "14", label: "Quantum Computing" },
-    // { key: "15", label: "Hardware" },
-    // { key: "16", label: "Tutorials" },
-    // { key: "17", label: "Smart Home" },
-    // { key: "18", label: "Startups" },
-  ];
+	return (
+		<div className="relative">
+			<header
+				className={`
+          fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md
+          ${
+						isScrolled
+							? 'bg-white/90 shadow-lg border-b border-gray-200'
+							: 'bg-white/80'
+					}
+        `}
+			>
+				{/* Main Navigation */}
+				<div className="container mx-auto px-4">
+					<div className="flex items-center justify-between h-16">
+						<div className="flex items-center space-x-8">
+							<Link href="/" className="group">
+								<h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:from-purple-600 group-hover:to-blue-600 transition-all duration-300">
+									TechFrom10
+								</h1>
+							</Link>
 
-  return (
-    <div className="nav-main">
-      <div className="nav-parent nav-parent-default">
-        <div className="nav-container">
-          <div className="nav-left">
-            <h1>
-              <Link href="/">TechFrom10 </Link>
-            </h1>
-            <ul>
-              <Link href="/">Home</Link>
-              <li onClick={() => setIsNewsletterOpen(true)}>Newsletter</li>
-              <Link href={"/aboutus"}>About Us</Link>
-            </ul>
-          </div>
-        </div>
-        {isNewsletterOpen && (
-          <NewsletterPopup
-            onClose={() => setIsNewsletterOpen(false)}
-            isOpen={isNewsletterOpen}
-            setIsNewsletterOpen={setIsNewsletterOpen}
-          />
-        )}
-        <div className="border-line" />
-        <div className="nav-items">
-          <ul>
-            {categories.map((category) => (
-              <li key={category.key}>
-                <Link
-                  href={`/categories/${category.route
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}`}
-                >
-                  {category.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      <MobHeader />
-    </div>
-  );
+							<nav className="hidden lg:flex items-center space-x-6">
+								<Link
+									href="/"
+									className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+								>
+									Home
+								</Link>
+								<button
+									onClick={() => setIsNewsletterOpen(true)}
+									className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+								>
+									Newsletter
+								</button>
+								<Link
+									href="/aboutus"
+									className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+								>
+									About Us
+								</Link>
+							</nav>
+						</div>
+					</div>
+				</div>
+
+				{/* Categories Bar */}
+				<div
+					className={`
+            border-t border-gray-200 bg-white/95 backdrop-blur-sm transition-all duration-300
+            ${
+							isScrolled
+								? 'opacity-0 -translate-y-2 pointer-events-none'
+								: 'opacity-100 translate-y-0'
+						}
+          `}
+				>
+					<div className="container mx-auto px-4">
+						<nav className="hidden lg:flex items-center space-x-1 py-3 overflow-x-auto">
+							{categories.map((category) => (
+								<Link
+									key={category.key}
+									href={`/categories/${category.route
+										.toLowerCase()
+										.replace(/\s+/g, '-')}`}
+									className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 whitespace-nowrap"
+								>
+									{category.label}
+								</Link>
+							))}
+						</nav>
+					</div>
+				</div>
+			</header>
+
+			{/* Spacer to prevent content overlap */}
+			<div
+				className={`${
+					isScrolled ? 'h-16' : 'h-28'
+				} transition-all duration-300`}
+			/>
+
+			{isNewsletterOpen && (
+				<NewsletterPopup
+					onClose={() => setIsNewsletterOpen(false)}
+					isOpen={isNewsletterOpen}
+					setIsNewsletterOpen={setIsNewsletterOpen}
+				/>
+			)}
+
+			<MobHeader />
+		</div>
+	);
 };
 
 export default Header;
