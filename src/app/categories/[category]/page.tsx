@@ -1,318 +1,213 @@
-"use client";
-import { useEffect, useState, useRef } from "react";
-import "./category.scss";
-import Image from "next/image";
-import Link from "next/link";
-import { FaExternalLinkAlt, FaEye, FaClock } from "react-icons/fa";
-import DatePickerComponent from "@/components/dataPicker/datePicker";
-import moment from "moment";
-import { useToast } from "@/components/ui/use-toast";
-import { Switch } from "@/components/ui/switch";
-import Footer from "@/components/footer/footer";
-import Loading from "../../loading";
-import { useRouter } from "next/navigation";
-import DefaultView from "@/components/defaultView/defaultView";
-import UnifiedView from "@/components/uniifiedView/unifiedView";
-import { Button } from "@/components/ui/button";
+// src/app/categories/[category]/page.tsx
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+
+import Footer from '@/components/footer/footer';
+import { CategoryHeader } from '@/components/category/CategoryHeader';
+import { CategoryContent } from '@/components/category/CategoryContent';
+import { CategorySidebar } from '@/components/category/CategorySidebar';
+
+interface CategoryPageProps {
+	params: { category: string };
+	searchParams: {
+		page?: string;
+		search?: string;
+		from?: string;
+		to?: string;
+		view?: string;
+	};
+}
 
 interface NewsItem {
-  _id: string;
-  headline: string;
-  title: string;
-  slugtitle: string;
-  headlines: string;
-  slugheadline: string;
-  summary: string;
-  date: string;
-  img_url?: string;
-  source?: string;
-  sources: string[];
-  published: string;
-  hashtags: string[];
+	_id: string;
+	headline: string;
+	title: string;
+	slugtitle: string;
+	headlines: string;
+	slugheadline: string;
+	summary: string;
+	date: string;
+	img_url?: string;
+	source?: string;
+	sources: string[];
+	published: string;
+	hashtags: string[];
 }
 
-interface CategoryProps {
-  params: { category: string };
+async function fetchCategoryData(category: string) {
+	try {
+		const response = await fetch(
+			`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/fetchCategory`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ category }),
+				cache: 'no-store',
+			},
+		);
+
+		if (!response.ok) {
+			return null;
+		}
+
+		const data: NewsItem[] = await response.json();
+		return data.sort(
+			(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+		);
+	} catch (error) {
+		console.error('Error fetching category data:', error);
+		return null;
+	}
 }
 
-interface DateRange {
-  from?: Date;
-  to?: Date;
+async function fetchLatestNews() {
+	try {
+		const response = await fetch(
+			`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/fetchRoundup`,
+			{ cache: 'no-store' },
+		);
+
+		if (!response.ok) {
+			throw new Error('Failed to fetch latest news');
+		}
+
+		const data: NewsItem[] = await response.json();
+		return data;
+	} catch (error) {
+		console.error('Error fetching latest news:', error);
+		return [];
+	}
 }
 
-const ITEMS_PER_PAGE = 5;
+function filterData(
+	data: NewsItem[],
+	searchParams: CategoryPageProps['searchParams'],
+) {
+	let filtered = [...data];
 
-const latestNewsData = async () => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/fetchRoundup`
-  );
-  const data: NewsItem[] = await response.json();
-  return data.sort(
-    (a, b) =>
-      moment(b.date, "MMM D, YYYY").valueOf() -
-      moment(a.date, "MMM D, YYYY").valueOf()
-  );
-};
+	// Search filter
+	if (searchParams.search) {
+		const query = searchParams.search.toLowerCase();
+		filtered = filtered.filter(
+			(item) =>
+				item.headline.toLowerCase().includes(query) ||
+				item.title.toLowerCase().includes(query),
+		);
+	}
 
-const CategoryPage = ({ params }: CategoryProps) => {
-  const category = params.category;
-  const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [data, setData] = useState<NewsItem[]>([]);
-  const [filteredData, setFilteredData] = useState<NewsItem[]>([]);
-  const [latestData, setLatestData] = useState<NewsItem[]>([]);
-  const [filteredDate, setFilteredDate] = useState<{
-    from: Date | null;
-    to: Date | null;
-  } | null>(null);
-  const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [unifiedView, setUnifiedView] = useState<boolean>(false);
-  const [visibleItems, setVisibleItems] = useState<number>(ITEMS_PER_PAGE);
+	// Date filter
+	if (searchParams.from || searchParams.to) {
+		filtered = filtered.filter((item) => {
+			const itemDate = new Date(item.date);
+			const fromDate = searchParams.from ? new Date(searchParams.from) : null;
+			const toDate = searchParams.to ? new Date(searchParams.to) : null;
 
-  const categoryParentContainerRef = useRef<HTMLDivElement>(null);
-  const categoryParentRightRef = useRef<HTMLDivElement>(null);
+			if (fromDate && itemDate < fromDate) return false;
+			if (toDate && itemDate > toDate) return false;
+			return true;
+		});
+	}
 
-  const hasReset = useRef(false);
+	return filtered;
+}
 
-  const handleViewChange = (checked: boolean) => {
-    setUnifiedView(checked);
-    setVisibleItems(ITEMS_PER_PAGE);
-  };
+function paginateData(
+	data: NewsItem[],
+	page: number,
+	itemsPerPage: number = 10,
+) {
+	const startIndex = (page - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
 
-  const handleLoadMore = () => {
-    setVisibleItems((prev) => prev + ITEMS_PER_PAGE);
-  };
+	return {
+		data: data.slice(0, endIndex), // For "load more" behavior
+		pagination: {
+			currentPage: page,
+			totalPages: Math.ceil(data.length / itemsPerPage),
+			totalItems: data.length,
+			itemsPerPage,
+			hasNextPage: endIndex < data.length,
+			hasPreviousPage: page > 1,
+		},
+	};
+}
 
-  const handleDateChange = (date: DateRange | null) => {
-    if (date) {
-      setFilteredDate({
-        from: date.from || null,
-        to: date.to || null,
-      });
-    } else {
-      setFilteredDate(null);
-    }
-    setVisibleItems(ITEMS_PER_PAGE);
-  };
+export async function generateMetadata({
+	params,
+}: CategoryPageProps): Promise<Metadata> {
+	const categoryName =
+		params.category.charAt(0).toUpperCase() + params.category.slice(1);
 
-  useEffect(() => {
-    const updateHeight = () => {
-      if (
-        categoryParentContainerRef.current &&
-        categoryParentRightRef.current
-      ) {
-        const containerHeight = categoryParentContainerRef.current.offsetHeight;
-        const viewportHeight = window.innerHeight;
-        categoryParentRightRef.current.style.height = `100%`;
-      }
-    };
+	return {
+		title: `Latest ${categoryName} News - TechFrom10`,
+		description: `Stay updated with the latest ${categoryName.toLowerCase()} news, trends, and insights from TechFrom10.`,
+	};
+}
 
-    // Initial height set
-    updateHeight();
+export default async function CategoryPage({
+	params,
+	searchParams,
+}: CategoryPageProps) {
+	const currentPage = parseInt(searchParams.page || '1');
+	const isUnifiedView = searchParams.view === 'unified';
 
-    // Update height when window is resized
-    window.addEventListener("resize", updateHeight);
+	// Fetch data
+	const [categoryData, latestNews] = await Promise.all([
+		fetchCategoryData(params.category),
+		fetchLatestNews(),
+	]);
 
-    // Update height when data changes
-    if (filteredData.length > 0) {
-      updateHeight();
-    }
+	if (!categoryData) {
+		notFound();
+	}
 
-    // Cleanup
-    return () => {
-      window.removeEventListener("resize", updateHeight);
-    };
-  }, [filteredData, unifiedView]);
+	// Filter and paginate data
+	const filteredData = filterData(categoryData, searchParams);
+	const paginatedResult = paginateData(filteredData, currentPage);
 
-  useEffect(() => {
-    document.title = `Latest ${
-      params.category.charAt(0).toUpperCase() + params.category.slice(1)
-    } News - Techfrom10`;
+	// Transform data to match component interface
+	const transformedData = paginatedResult.data.map((item) => ({
+		_id: item.slugtitle,
+		title: item.title,
+		slugtitle: item.slugtitle,
+		headlines: [item.headline],
+		slugheadlines: [item.slugheadline],
+		summary: [item.summary],
+		sources: item.source ? [item.source] : [],
+		published: [item.date],
+		hashtags: item.hashtags || [],
+		img_url: item.img_url || '',
+		date: item.date,
+	}));
 
-    const fetchData = async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/fetchCategory`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ category }),
-        }
-      );
+	const categoryName =
+		params.category.charAt(0).toUpperCase() + params.category.slice(1);
 
-      if (response.status === 200) {
-        const categoryData: NewsItem[] = await response.json();
-        const sortedData = [...categoryData].sort(
-          (a, b) =>
-            moment(b.date, "MMM D, YYYY").valueOf() -
-            moment(a.date, "MMM D, YYYY").valueOf()
-        );
-        setData(sortedData);
-        setFilteredData(sortedData);
-      } else {
-        router.push("/");
-      }
-      setLoading(false);
-    };
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+			<div className="container mx-auto px-4 py-8 max-w-7xl">
+				<CategoryHeader
+					categoryName={categoryName}
+					isUnifiedView={isUnifiedView}
+				/>
 
-    const fetchLatestNews = async () => {
-      const latestNews = await latestNewsData();
-      setLatestData(latestNews);
-    };
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+					<div className="lg:col-span-2">
+						<CategoryContent
+							data={transformedData}
+							pagination={paginatedResult.pagination}
+							isUnifiedView={isUnifiedView}
+							category={params.category}
+						/>
+					</div>
 
-    fetchData();
-    fetchLatestNews();
-  }, [category]);
+					<div className="lg:col-span-1">
+						<CategorySidebar latestNews={{ data: latestNews }} />
+					</div>
+				</div>
+			</div>
 
-  useEffect(() => {
-    if (!filteredDate) {
-      setFilteredData(data);
-      return;
-    }
-
-    const from = moment(filteredDate.from).startOf("day");
-    const to = filteredDate.to
-      ? moment(filteredDate.to).endOf("day")
-      : from.endOf("day");
-
-    const newFilteredData = data.filter((item) =>
-      moment(item.date).isBetween(from, to, null, "[]")
-    );
-
-    if (newFilteredData.length === 0) {
-      toast({
-        title: "No results found for the selected Filter.",
-      });
-      setFilteredData(data);
-    } else {
-      setFilteredData(newFilteredData);
-    }
-    setVisibleItems(ITEMS_PER_PAGE); //----
-  }, [filteredDate, data]);
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
-    setVisibleItems(ITEMS_PER_PAGE); //-----
-  };
-
-  const filteredResults = filteredData.filter((item) =>
-    item.headline.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-  };
-
-  const visibleResults = unifiedView
-    ? filteredData
-    : filteredResults.slice(0, visibleItems);
-  const hasMoreItems = !unifiedView && visibleItems < filteredResults.length;
-
-  return (
-    <div>
-      {loading ? (
-        <Loading />
-      ) : (
-        <div className="category-parent">
-          <div
-            className="category-parent-container"
-            ref={categoryParentContainerRef}
-          >
-            <div className="category-parent-left">
-              <div className="category-container-title">
-                <Link href="/#">
-                  <h3>Your Tech Round-Up!</h3>
-                </Link>
-                <div className="flex items-center gap-1">
-                  <h3>Unified View</h3>
-                  <Switch
-                    checked={unifiedView}
-                    onCheckedChange={handleViewChange}
-                  />
-                </div>{" "}
-                <div className="flex items-center gap-4">
-                  <DatePickerComponent onDateChange={handleDateChange} />
-                </div>
-              </div>
-              <div className="category-hero-container-wrap">
-                {unifiedView ? (
-                  <UnifiedView
-                    data={filteredResults.map((item) => ({
-                      _id: item.slugtitle,
-                      headlines: [item.headline],
-                      slugheadlines: [item.slugheadline],
-                      published: [item.published],
-                      sources: item.source ? [item.source] : [],
-                    }))}
-                  />
-                ) : (
-                  visibleResults.map((value) => (
-                    <DefaultView
-                      key={value.slugtitle}
-                      val={{
-                        _id: value.slugtitle,
-                        title: value.title,
-                        slugtitle: value.slugtitle,
-                        headlines: [value.headline],
-                        slugheadlines: [value.slugheadline],
-                        summary: [value.summary],
-                        sources: value.source ? [value.source] : [],
-                        published: [value.date],
-                        hashtags: [],
-                        img_url: value.img_url || "",
-                        date: value.date,
-                      }}
-                    />
-                  ))
-                )}
-                {hasMoreItems && (
-                  <div className="load-more-button">
-                    <Button onClick={handleLoadMore}>Load More</Button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="category-parent-right" ref={categoryParentRightRef}>
-              <div className="hero-category-search-container">
-                <div className="category-search">
-                  <form onSubmit={handleSearchSubmit}>
-                    <input
-                      type="text"
-                      placeholder="Search News..."
-                      value={searchQuery}
-                      onChange={handleSearchChange}
-                    />
-                    <button type="submit">Search</button>
-                  </form>
-                </div>
-              </div>
-              <div className="category-hero-card2">
-                <h3>Latest News</h3>
-                <div className="category-hero-card-items2">
-                  {latestData.slice(-10).map((element) => (
-                    <Link
-                      key={element.headlines}
-                      href={`/post/${encodeURIComponent(
-                        element.slugtitle.replaceAll(" ", "-")
-                      )}`}
-                      target="_blank"
-                    >
-                      {element.title}
-                      <FaExternalLinkAlt className="link-icon" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      <div className="category-footer">
-        <Footer />
-      </div>
-    </div>
-  );
-};
-
-export default CategoryPage;
+			<Footer />
+		</div>
+	);
+}
