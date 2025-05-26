@@ -42,8 +42,8 @@ export default async function Page({
 								<ClientWrapper />
 							</div>
 						</div>
-
 						{/* Content Area */}
+
 						<Suspense fallback={<Loading />}>
 							<DataFetcher
 								page={page}

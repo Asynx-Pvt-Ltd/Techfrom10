@@ -23,7 +23,7 @@ export default function RelatedNewsCard({
 					<div className="flex gap-4">
 						{img_url && (
 							<div className="flex-shrink-0">
-								<div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
+								<div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100">
 									<Image
 										src={img_url}
 										alt={removeAsterisks(headline)}
