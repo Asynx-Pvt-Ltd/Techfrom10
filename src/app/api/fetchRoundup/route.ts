@@ -17,67 +17,88 @@ export const GET = async (req: Request) => {
 		const page = parseInt(url.searchParams.get('page') || '1');
 		const limit = parseInt(url.searchParams.get('limit') || '10');
 		const searchQuery = url.searchParams.get('search') || '';
+		const tagsParam = url.searchParams.get('tags') || '';
 
 		const validPage = Math.max(1, page);
 		const validLimit = Math.min(Math.max(1, limit), 100);
 		const offset = (validPage - 1) * validLimit;
 
+		// Parse selected tags
+		const selectedTags = tagsParam
+			? decodeURI(tagsParam)
+					.split(',')
+					.map((tag) => tag.trim())
+					.filter((tag) => tag)
+			: [];
+
 		// Build the search condition
-		let whereClause = '';
+		let whereConditions: string[] = [];
 		let dataQueryParams: (number | string)[] = [];
 		let countQueryParams: (number | string)[] = [];
+		let paramIndex = 1;
 
+		// Add search condition if search query exists
 		if (searchQuery.trim()) {
-			// Fixed search query - hashtags is a simple text array, not nested
-			whereClause = `
-	WHERE (
-		EXISTS (
-			SELECT 1 FROM unnest(headlines) AS headline 
-			WHERE headline ILIKE $1
-		) OR
-		EXISTS (
-			SELECT 1 FROM unnest(summaries) AS summary 
-			WHERE summary ILIKE $1
-		) OR
-		EXISTS (
-			SELECT 1 FROM unnest(sources) AS source 
-			WHERE source ILIKE $1
-		) OR
-		EXISTS (
-			SELECT 1 FROM unnest(hashtags) AS hashtag 
-			WHERE hashtag ILIKE $1
-		) OR
-		title ILIKE $1
-	)
-`;
+			whereConditions.push(`(
+				EXISTS (
+					SELECT 1 FROM unnest(headlines) AS headline 
+					WHERE headline ILIKE ${paramIndex}
+				) OR
+				EXISTS (
+					SELECT 1 FROM unnest(summaries) AS summary 
+					WHERE summary ILIKE ${paramIndex}
+				) OR
+				EXISTS (
+					SELECT 1 FROM unnest(sources) AS source 
+					WHERE source ILIKE ${paramIndex}
+				) OR
+				EXISTS (
+					SELECT 1 FROM unnest(hashtags) AS hashtag 
+					WHERE hashtag ILIKE ${paramIndex}
+				) OR
+				title ILIKE ${paramIndex}
+			)`);
+
 			const searchParam = `%${searchQuery.trim()}%`;
-			dataQueryParams = [searchParam, validLimit, offset];
-			countQueryParams = [searchParam];
-		} else {
-			dataQueryParams = [validLimit, offset];
-			countQueryParams = [];
+			dataQueryParams.push(searchParam);
+			countQueryParams.push(searchParam);
+			paramIndex++;
 		}
+
+		// Add tags filter condition if tags are selected
+		if (selectedTags.length > 0) {
+			// Create a condition that checks if any of the selected tags exist in the hashtags array
+			const tagConditions = selectedTags.map((tag, index) => {
+				const currentParamIndex = paramIndex + index;
+				dataQueryParams.push(tag);
+				countQueryParams.push(tag);
+				return `$${currentParamIndex} = ANY(hashtags)`;
+			});
+
+			whereConditions.push(`(${tagConditions.join(' OR ')})`);
+			paramIndex += selectedTags.length;
+		}
+
+		// Combine all conditions
+		const whereClause =
+			whereConditions.length > 0
+				? `WHERE ${whereConditions.join(' AND ')}`
+				: '';
+
+		// Add pagination parameters
+		dataQueryParams.push(validLimit, offset);
 
 		// Get total count with search filter
 		const countQuery = `SELECT COUNT(*) FROM tech_trends ${whereClause}`;
 		const countRes = await client.query(countQuery, countQueryParams);
 
-		// Get paginated results with search filter
-		let dataQuery = '';
-		if (searchQuery.trim()) {
-			dataQuery = `
-				SELECT * FROM tech_trends 
-				${whereClause}
-				ORDER BY TO_DATE(date, 'Mon DD, YYYY') DESC 
-				LIMIT $2 OFFSET $3
-			`;
-		} else {
-			dataQuery = `
-				SELECT * FROM tech_trends 
-				ORDER BY TO_DATE(date, 'Mon DD, YYYY') DESC 
-				LIMIT $1 OFFSET $2
-			`;
-		}
+		// Get paginated results with filters
+		const dataQuery = `
+			SELECT * FROM tech_trends 
+			${whereClause}
+			ORDER BY TO_DATE(date, 'Mon DD, YYYY') DESC 
+			LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+		`;
 
 		const res = await client.query(dataQuery, dataQueryParams);
 
@@ -95,8 +116,8 @@ export const GET = async (req: Request) => {
 				hasPreviousPage: validPage > 1,
 			},
 			searchQuery: searchQuery.trim(),
+			selectedTags,
 		};
-
 		return new Response(JSON.stringify(response), {
 			headers: { 'Content-Type': 'application/json' },
 		});
