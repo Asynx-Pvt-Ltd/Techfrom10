@@ -1,7 +1,7 @@
 import DefaultView from '@/components/defaultView/defaultView';
 import UnifiedView from '@/components/uniifiedView/unifiedView';
-import { InfiniteScroll } from './InfiniteScroll';
 import { DataProps } from '@/types';
+import { LoadMore } from './LoadMore';
 
 interface ContentRendererProps {
 	data: DataProps[];
@@ -44,7 +44,7 @@ export function ContentRenderer({
 				</div>
 			)}
 
-			<InfiniteScroll
+			<LoadMore
 				hasNextPage={pagination.hasNextPage}
 				currentPage={pagination.currentPage}
 				totalItems={pagination.totalItems}
