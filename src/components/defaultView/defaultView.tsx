@@ -8,6 +8,8 @@ import generateSlug, { removeAsterisks } from '@/helper/slugFormat';
 interface Props {
 	isComplete?: boolean;
 	completeCheck?: boolean;
+	isComplete?: boolean;
+	completeCheck?: boolean;
 	val: {
 		_id: string;
 		title: string;
