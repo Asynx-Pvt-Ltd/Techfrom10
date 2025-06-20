@@ -18,6 +18,8 @@ export const GET = async (req: Request) => {
 		const limit = parseInt(url.searchParams.get('limit') || '10');
 		const searchQuery = url.searchParams.get('search') || '';
 		const tagsParam = url.searchParams.get('tags') || '';
+		const dateFrom = url.searchParams.get('from') || '';
+		const dateTo = url.searchParams.get('to') || '';
 
 		const validPage = Math.max(1, page);
 		const validLimit = Math.min(Math.max(1, limit), 100);
@@ -83,6 +85,33 @@ export const GET = async (req: Request) => {
 			paramIndex += selectedTags.length;
 		}
 
+		// Add date range filter condition if dates are provided
+		if (dateFrom || dateTo) {
+			if (dateFrom && dateTo) {
+				// Both from and to dates provided
+				whereConditions.push(
+					`TO_DATE(date, 'Mon DD, YYYY') BETWEEN $${paramIndex} AND $${
+						paramIndex + 1
+					}`,
+				);
+				dataQueryParams.push(dateFrom, dateTo);
+				countQueryParams.push(dateFrom, dateTo);
+				paramIndex += 2;
+			} else if (dateFrom) {
+				// Only from date provided
+				whereConditions.push(`TO_DATE(date, 'Mon DD, YYYY') >= $${paramIndex}`);
+				dataQueryParams.push(dateFrom);
+				countQueryParams.push(dateFrom);
+				paramIndex += 1;
+			} else if (dateTo) {
+				// Only to date provided
+				whereConditions.push(`TO_DATE(date, 'Mon DD, YYYY') <= $${paramIndex}`);
+				dataQueryParams.push(dateTo);
+				countQueryParams.push(dateTo);
+				paramIndex += 1;
+			}
+		}
+
 		// Combine all conditions
 		const whereClause =
 			whereConditions.length > 0
@@ -121,6 +150,10 @@ export const GET = async (req: Request) => {
 			},
 			searchQuery: searchQuery.trim(),
 			selectedTags,
+			dateFilter: {
+				from: dateFrom || null,
+				to: dateTo || null,
+			},
 		};
 		return new Response(JSON.stringify(response), {
 			headers: { 'Content-Type': 'application/json' },
