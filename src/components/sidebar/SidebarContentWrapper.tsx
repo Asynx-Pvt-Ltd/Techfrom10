@@ -1,8 +1,6 @@
-import { SearchBar } from './searchbar/searchBar';
-import { NewsCard } from '@/components/newsCard/newsCard';
-import { TopicsCard } from './topicsCard/topicsCard';
+import { SidebarContent } from './SidebarContent';
 
-export async function SidebarContent() {
+export async function SidebarContentWrapper() {
 	try {
 		const response = await fetch(
 			`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/fetchRoundup`,
@@ -24,13 +22,7 @@ export async function SidebarContent() {
 			),
 		);
 
-		return (
-			<>
-				<SearchBar />
-				<NewsCard data={data} />
-				<TopicsCard uniqueHashtags={uniqueHashtags} />
-			</>
-		);
+		return <SidebarContent data={data} uniqueHashtags={uniqueHashtags} />;
 	} catch (error) {
 		console.error('Error fetching sidebar data:', error);
 		return <div>Error loading sidebar content</div>;
