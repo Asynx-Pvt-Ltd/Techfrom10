@@ -4,8 +4,7 @@ import Footer from '@/components/footer/footer';
 import Loading from './loading';
 import { ClientWrapper } from '@/components/ClientWrapper';
 import { DataFetcher } from '@/components/DataFetcher';
-import { SidebarContent } from '@/components/sidebar/SidebarContent';
-import { SidebarContentWrapper } from '../components/sidebar/SideBarContentWrapper';
+import { SidebarContentWrapper } from '../components/sidebar/SidebarContentWrapper';
 
 export default async function Page({
 	searchParams,
