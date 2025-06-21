@@ -62,7 +62,9 @@ const DateBox = ({ dateString }: { dateString: string }) => {
 };
 
 const DefaultView: NextPage<Props> = ({ val, completeCheck = false }) => {
-	const shouldRender = completeCheck ? val.headlines.length === 11 : true;
+	const shouldRender = completeCheck
+		? [10, 11].includes(val.headlines.length)
+		: true;
 
 	return shouldRender ? (
 		<div
