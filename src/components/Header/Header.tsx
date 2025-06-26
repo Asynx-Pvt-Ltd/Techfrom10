@@ -80,11 +80,11 @@ const Header: NextPage<Props> = ({}) => {
 				{/* Categories Bar */}
 				<div
 					className={`
-            border-t border-gray-200 bg-white/95 backdrop-blur-sm transition-all duration-300
+            transition-all duration-300 overflow-hidden
             ${
 							isScrolled
-								? 'opacity-0 -translate-y-2 pointer-events-none'
-								: 'opacity-100 translate-y-0'
+								? 'h-0 opacity-0 border-t-0'
+								: 'h-auto opacity-100 border-t border-gray-200 bg-white/95 backdrop-blur-sm'
 						}
           `}
 				>
@@ -109,7 +109,7 @@ const Header: NextPage<Props> = ({}) => {
 			{/* Spacer to prevent content overlap */}
 			<div
 				className={`${
-					isScrolled ? 'h-16' : 'h-28'
+					isScrolled ? 'h-36' : 'h-28'
 				} transition-all duration-300`}
 			/>
 

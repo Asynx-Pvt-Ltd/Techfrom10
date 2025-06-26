@@ -4,14 +4,25 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: $grady-color;
+    background: linear-gradient(to right, #2563eb, #9333ea); // blue-600 to purple-600
     color: #fff;
     border: none;
     border-radius: 50%;
     padding: 8px;
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
     @include flex-center();
+    
+    &:hover {
+        background: linear-gradient(to right, #9333ea, #2563eb); // Reverse gradient on hover
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
 }
 
 .scrollToTop-hidden {

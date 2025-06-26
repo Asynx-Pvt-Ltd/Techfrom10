@@ -4,7 +4,7 @@ import Footer from '@/components/footer/footer';
 import Loading from './loading';
 import { ClientWrapper } from '@/components/ClientWrapper';
 import { DataFetcher } from '@/components/DataFetcher';
-import { SidebarContent } from '@/components/SidebarContent';
+import { SidebarContentWrapper } from '../components/sidebar/SidebarContentWrapper';
 
 export default async function Page({
 	searchParams,
@@ -42,8 +42,8 @@ export default async function Page({
 								<ClientWrapper />
 							</div>
 						</div>
-
 						{/* Content Area */}
+
 						<Suspense fallback={<Loading />}>
 							<DataFetcher
 								page={page}
@@ -60,7 +60,7 @@ export default async function Page({
 					<div className="lg:w-80 space-y-6">
 						<div className="sticky top-8 space-y-6">
 							<Suspense fallback={<div>Loading sidebar...</div>}>
-								<SidebarContent />
+								<SidebarContentWrapper />
 							</Suspense>
 						</div>
 					</div>

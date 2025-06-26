@@ -10,8 +10,8 @@ export default function ArticleLoading() {
 							<div className="space-y-6">
 								{/* Headline skeleton */}
 								<div className="animate-pulse space-y-3">
-									<div className="h-8 bg-gray-200 rounded-lg"></div>
-									<div className="h-8 bg-gray-200 rounded-lg w-4/5"></div>
+									<div className="h-8 bg-gray-200 rounded-xl"></div>
+									<div className="h-8 bg-gray-200 rounded-xl w-4/5"></div>
 								</div>
 
 								{/* Summary skeleton */}
@@ -27,7 +27,7 @@ export default function ArticleLoading() {
 									<div className="h-4 bg-gray-200 rounded w-32"></div>
 								</div>
 								<div className="animate-pulse">
-									<div className="h-10 bg-gray-200 rounded-lg w-36"></div>
+									<div className="h-10 bg-gray-200 rounded-xl w-36"></div>
 								</div>
 							</div>
 						</div>
@@ -39,7 +39,7 @@ export default function ArticleLoading() {
 					<div className="mb-8">
 						<div className="flex items-center justify-between">
 							<div className="animate-pulse">
-								<div className="h-8 bg-gray-200 rounded-lg w-48"></div>
+								<div className="h-8 bg-gray-200 rounded-xl w-48"></div>
 							</div>
 							<div className="animate-pulse">
 								<div className="h-6 bg-gray-200 rounded w-20"></div>
@@ -57,7 +57,7 @@ export default function ArticleLoading() {
 								<div className="p-6">
 									<div className="flex gap-4">
 										<div className="flex-shrink-0">
-											<div className="animate-pulse w-20 h-20 bg-gray-200 rounded-lg"></div>
+											<div className="animate-pulse w-20 h-20 bg-gray-200 rounded-xl"></div>
 										</div>
 
 										<div className="flex-1 min-w-0">
