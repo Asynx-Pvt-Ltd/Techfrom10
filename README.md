@@ -15,14 +15,14 @@ This project is built using a modern tech stack featuring **Next.js**, **SCSS**,
 
 ## 🔑 Key Features
 
-- 🧠 **AI-Powered News Generation** — Search and generate news content using Perplexity AI.
-- 🖼️ **Image Generation** — Automatically create relevant images using DALL·E 3.
-- ☁️ **AWS S3 Integration** — Upload and serve images via Amazon S3.
-- 🗄️ **PostgreSQL Database** — Efficient storage of news content and image data.
-- ⚡ **Next.js Framework** — Provides fast, responsive, and SEO-friendly UI.
-- 🎨 **SCSS Styling** — Organized and modular styles using SCSS.
-- 🔐 **TypeScript Support** — Improves code maintainability and scalability.
-- 🔌 **API Routes** — Backend functionality with Next.js API routes.
+- 🧠 **AI-Powered News Generation** - Search and generate news content using Perplexity AI.
+- 🖼️ **Image Generation** - Automatically create relevant images using DALL·E 3.
+- ☁️ **AWS S3 Integration** - Upload and serve images via Amazon S3.
+- 🗄️ **PostgreSQL Database** - Efficient storage of news content and image data.
+- ⚡ **Next.js Framework** - Provides fast, responsive, and SEO-friendly UI.
+- 🎨 **SCSS Styling** - Organized and modular styles using SCSS.
+- 🔐 **TypeScript Support** - Improves code maintainability and scalability.
+- 🔌 **API Routes** - Backend functionality with Next.js API routes.
 
 ---
 
@@ -41,5 +41,12 @@ This project is built using a modern tech stack featuring **Next.js**, **SCSS**,
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/techfrom10.git
+git clone https://github.com/Asynx-Pvt-Ltd/Techfrom10.git
 cd techfrom10
+```
+### Add ENV's
+
+```bash
+yarn
+yarn dev
+```
