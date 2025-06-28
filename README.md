@@ -1,39 +1,45 @@
-# Techfrom10
+# Techfrom10 News Application
 
-News application that generates news by searching web using perplexity ai. Dalle-3 for image generation and upload into aws s3 and stored into postgresql. 
+![Techfrom10 Screenshot](https://github.com/user-attachments/assets/78407674-f17e-42ba-9eef-c1d626b4ccaf)
 
-Tech Stack: Next.js, SCSS, Typescript, Postgresql, AWS S3, API routes, Perplexity AI
-
-# Techfrom10 News Application 📰
+> Live at: [Techfrom10](https://techfrom10.com)  
+> Powered by [Asynx Pvt. Ltd](https://asynx.in)
 
 ## Overview ℹ️
-Techfrom10 News Application is a cutting-edge platform that utilizes Perplexity AI to generate news by searching the web. It also leverages DALL-E-3 for image generation and seamlessly uploads them to AWS S3, storing the data into PostgreSQL. The tech stack includes Next.js, SCSS, TypeScript, PostgreSQL, AWS S3, API routes, and Perplexity AI.
 
-## Key Features 🔑
-- **AI-Powered News Generation**: Utilize Perplexity AI to generate news articles by searching the web.
-- **Image Generation**: Use DALL-E-3 for creating images related to news articles.
-- **AWS S3 Integration**: Upload generated images to AWS S3 for storage and retrieval.
-- **PostgreSQL Database**: Store news data in a PostgreSQL database for efficient management.
-- **Next.js Framework**: Build the application using Next.js for a fast and responsive user experience.
-- **SCSS Styling**: Implement custom styles using SCSS for a visually appealing interface.
-- **TypeScript Support**: Enhance code quality and maintainability with TypeScript.
-- **API Routes**: Implement API routes for seamless communication between the frontend and backend.
+**Techfrom10** is an AI-powered news platform that automatically generates and displays the latest news by searching the web using **Perplexity AI**. It also uses **DALL·E 3** to generate relevant images, which are uploaded to **AWS S3**, with metadata stored in a **PostgreSQL** database.
 
-## Badges 🏅
-- Perplexity AI
+This project is built using a modern tech stack featuring **Next.js**, **SCSS**, **TypeScript**, **PostgreSQL**, **AWS S3**, and API routes.
 
-## Get Started 🚀
-To get started with Techfrom10 News Application, follow these steps:
-1. Clone the repository.
-2. Install dependencies using `npm install`.
-3. Configure the PostgreSQL database and AWS S3 credentials.
-4. Start the development server using `npm run dev`.
-5. Explore the AI-powered news generation and image uploading features.
+---
 
-## Contribution Guidelines 🤝
-We welcome contributions to enhance the Techfrom10 News Application. Feel free to submit pull requests or open issues for any improvements or bug fixes.
+## 🔑 Key Features
 
-## Support 📧
-For any queries or support related to the Techfrom10 News Application, please reach out to us at [support@techfrom10.com](mailto:support@techfrom10.com).
+- 🧠 **AI-Powered News Generation** — Search and generate news content using Perplexity AI.
+- 🖼️ **Image Generation** — Automatically create relevant images using DALL·E 3.
+- ☁️ **AWS S3 Integration** — Upload and serve images via Amazon S3.
+- 🗄️ **PostgreSQL Database** — Efficient storage of news content and image data.
+- ⚡ **Next.js Framework** — Provides fast, responsive, and SEO-friendly UI.
+- 🎨 **SCSS Styling** — Organized and modular styles using SCSS.
+- 🔐 **TypeScript Support** — Improves code maintainability and scalability.
+- 🔌 **API Routes** — Backend functionality with Next.js API routes.
 
-Let's revolutionize news generation with AI and cutting-edge technologies! 🌟
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js, TypeScript, SCSS  
+- **Backend**: Next.js API Routes  
+- **Database**: PostgreSQL  
+- **Cloud**: AWS S3  
+- **AI Integrations**: Perplexity AI (text), DALL·E 3 (images)
+
+---
+
+## 🚀 Getting Started
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/your-username/techfrom10.git
+cd techfrom10
